@@ -4,7 +4,10 @@ import (
 	"testing"
 	"time"
 
+	"github.com/golang/mock/gomock"
 	"github.com/ksd-mx/mx-payments/domain/entity"
+	mock_repository "github.com/ksd-mx/mx-payments/domain/repository/mock"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestProcessTransaction_ExecuteInvalidCreditCard(t *testing.T) {
@@ -22,8 +25,21 @@ func TestProcessTransaction_ExecuteInvalidCreditCard(t *testing.T) {
 	expectedOutput := TransactionOutputDTO{
 		ID:           "1",
 		Status:       entity.REJECTED,
-		ErrorMessage: "invalid credit card",
+		ErrorMessage: "Invalid credit card number",
 	}
 
-	usecase := NewProcessTransaction(repository)
+	controller := gomock.NewController(t)
+	defer controller.Finish()
+
+	repositoryMock := mock_repository.NewMockTransactionRepository(controller)
+	repositoryMock.
+		EXPECT().
+		SaveTransaction(input.ID, input.AccountID, input.Amount, expectedOutput.Status, expectedOutput.ErrorMessage).
+		Return(nil)
+
+	usecase := NewProcessTransaction(repositoryMock)
+	output, err := usecase.Execute(input)
+
+	assert.Nil(t, err)
+	assert.Equal(t, expectedOutput, output)
 }

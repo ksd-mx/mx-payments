@@ -34,7 +34,7 @@ func (m *MockTransactionRepository) EXPECT() *MockTransactionRepositoryMockRecor
 }
 
 // SaveTransaction mocks base method.
-func (m *MockTransactionRepository) SaveTransaction(id, account, amount, status, errorMessage string) error {
+func (m *MockTransactionRepository) SaveTransaction(id, account string, amount float64, status, errorMessage string) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SaveTransaction", id, account, amount, status, errorMessage)
 	ret0, _ := ret[0].(error)
