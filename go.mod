@@ -1,10 +1,11 @@
 module github.com/ksd-mx/mx-payments
 
-go 1.17
+go 1.18
 
 require github.com/golang-migrate/migrate/v4 v4.16.1
 
 require (
+	github.com/confluentinc/confluent-kafka-go v1.9.2 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/golang-migrate/migrate v3.5.4+incompatible // indirect
 	github.com/golang/mock v1.6.0 // indirect
