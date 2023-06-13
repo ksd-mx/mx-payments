@@ -43,9 +43,9 @@ func TestProcessTransaction_ExecuteInvalidCreditCard(t *testing.T) {
 	producerMock.EXPECT().Publish(
 		expectedOutput,
 		[]byte(input.ID),
-		"transaction_result")
+		broker.TransactionResultTopic)
 
-	usecase := NewProcessTransaction(repositoryMock, producerMock, "transaction_result")
+	usecase := NewProcessTransaction(repositoryMock, producerMock, broker.TransactionResultTopic)
 	output, err := usecase.Execute(input)
 	assert.Nil(t, err)
 	assert.Equal(t, expectedOutput, output)
