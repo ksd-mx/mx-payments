@@ -23,14 +23,14 @@ func main() {
 	transactionRepository := repositoryFactory.CreateTransactionRepository()
 
 	configMsgProducer := &ck.ConfigMap{
-		"bootstrap.servers": "localhost:9092",
+		"bootstrap.servers": "localhost:29092",
 	}
 	kafkaPresenter := transaction.NewTransactionKakfaPresenter()
 	producer := kafka.NewKafkaProducer(configMsgProducer, kafkaPresenter)
 
 	var msgChan = make(chan *ck.Message)
 	configMsgConsumer := &ck.ConfigMap{
-		"bootstrap.servers": "localhost:9092",
+		"bootstrap.servers": "kafka:29092",
 		"client.id":         "mx-payments",
 		"group.id":          "mx-payments",
 	}
