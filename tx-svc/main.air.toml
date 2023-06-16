@@ -1,0 +1,8 @@
+[build]
+cmd = "go build -o ./cmd/main.go ."
+bin = "./cmd"
+
+[watch]
+includes = [
+  "cmd/**/*",
+]
