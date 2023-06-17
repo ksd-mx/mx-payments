@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tx-svc
+  namespace: mx-payments
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tx-svc
+  template:
+    metadata:
+      labels:
+        app: tx-svc
+    spec:
+      containers:
+      - name: tx-svc
+        image: github.com/ksd-mx/mx-payments
+        ports:
+          - containerPort: 8080
+        env:
+          - name: KAFKA_BROKER
+            value: "kafka:9092"
+          - name: POSTGRES_USER
+            valueFrom:
+              secretKeyRef:
+                name: postgres-credentials
+                key: POSTGRES_USER
+          - name: POSTGRES_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: postgres-credentials
+                key: POSTGRES_PASSWORD
+          - name: POSTGRES_DB
+            value: "test"
+          - name: POSTGRES_HOST
+            value: "postgres-service"
+          - name: POSTGRES_SSLMODE
+            value: "disable"

@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: topics-generator
+  namespace: mx-payments
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: topics-generator
+  template:
+    metadata:
+      labels:
+        app: topics-generator
+    spec:
+      initContainers:
+        - name: init-topics-generator
+          image: busybox:1.28
+          command:
+            - sh
+            - -c
+            - >
+              until nslookup kafka; do
+                echo "waiting for kafka";
+                sleep 2;
+              done
+      containers:
+        - name: kafka-topics-generator
+          image: confluentinc/cp-kafka:latest
+          command: ["/bin/bash", "-c"]
+          args:
+            - |
+              sleep 5s &&
+              kafka-topics --create --topic=transaction --if-not-exists --bootstrap-server=kafka:9092 &&
+              kafka-topics --create --topic=transaction_result --if-not-exists --bootstrap-server=kafka:9092a
