@@ -14,7 +14,7 @@ include "env" {
 
 inputs = {
   env                             = include.env.locals.env
-  eks_name                        = include.root.locals.eks_name
+  eks_name                        = dependency.eks.outputs.eks_name
   openid_provider_url             = dependency.eks.outputs.openid_provider_arn
   enable_cluster_autoscaler       = true
   cluster_autoscaler_helm_version = "9.28.0"

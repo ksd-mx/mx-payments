@@ -2,10 +2,10 @@ data "aws_iam_openid_connect_provider" "this" {
   arn = var.openid_provider_arn
 }
 
-data "aws_iam_policy_document" "cluster_autoescaler" {
+data "aws_iam_policy_document" "cluster_autoscaler" {
   statement {
     actions = ["sts:AssumeRoleWithWebIdentity"]
-    Effect  = "Allow"
+    effect  = "Allow"
 
     condition {
       test     = "StringEquals"
@@ -21,71 +21,73 @@ data "aws_iam_policy_document" "cluster_autoescaler" {
 }
 
 resource "aws_iam_role" "cluster_autoscaler" {
-    count = var.enable_cluster_autoscaler ? 1 : 0
-    assume_role_policy = data.aws_iam_policy_document.cluster_autoescaler.json
-    name = "${var.eks_name}-cluster-autoscaler"
+  count = var.enable_cluster_autoscaler ? 1 : 0
+
+  assume_role_policy = data.aws_iam_policy_document.cluster_autoscaler.json
+  name               = "${var.eks_name}-cluster-autoscaler"
 }
 
-resource "aws_iam_polict" "cluster_autoescaler" {
-    count = var.enable_cluster_autoscaler ? 1 : 0
+resource "aws_iam_policy" "cluster_autoscaler" {
+  count = var.enable_cluster_autoscaler ? 1 : 0
 
-    name = "${var.eks_name}-cluster-autoscaler"
+  name = "${var.eks_name}-cluster-autoscaler"
 
-    policy = jsonencode({
-        Version = "2012-10-17"
-        Statement = [
-            {
-                Action = [
-                    "autoscaling:DescribeAutoScalingGroups",
-                    "autoscaling:DescribeAutoScalingInstances",
-                    "autoscaling:DescribeLaunchConfigurations",
-                    "ec2:DescribeInstaceTypes",
-                    "ec2:DescribeLaunchTemplateVersions"
-                ]
-                Effect = "Allow"
-                Resource = "*"
-            },
-            {
-                Action = [
-                    "autoscaling:SetDesiredCapacity",
-                    "autoscaling:TerminateInstanceInAutoScalingGroup"
-                ]
-                Effect = "Allow"
-                Resource = "*"
-            }
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = [
+          "autoscaling:DescribeAutoScalingGroups",
+          "autoscaling:DescribeAutoScalingInstances",
+          "autoscaling:DescribeLaunchConfigurations",
+          "autoscaling:DescribeScalingActivities",
+          "ec2:DescribeInstanceTypes",
+          "ec2:DescribeLaunchTemplateVersions"
         ]
-    })
+        Effect   = "Allow"
+        Resource = "*"
+      },
+      {
+        Action = [
+          "autoscaling:SetDesiredCapacity",
+          "autoscaling:TerminateInstanceInAutoScalingGroup"
+        ]
+        Effect   = "Allow"
+        Resource = "*"
+      },
+    ]
+  })
 }
 
 resource "aws_iam_role_policy_attachment" "cluster_autoscaler" {
-    count = var.enable_cluster_autoscaler ? 1 : 0
+  count = var.enable_cluster_autoscaler ? 1 : 0
 
-    role = aws_iam_role.cluster_autoscaler[0].name
-    policy_arn = aws_iam_policy.cluster_autoescaler[0].arn
+  role       = aws_iam_role.cluster_autoscaler[0].name
+  policy_arn = aws_iam_policy.cluster_autoscaler[0].arn
 }
 
 resource "helm_release" "cluster_autoscaler" {
-    count = var.enable_cluster_autoscaler ? 1 : 0
+  count = var.enable_cluster_autoscaler ? 1 : 0
 
-    name = "autoscaler"
+  name = "autoscaler"
 
-    repository = "https://kubernetes.github.io/autoscaler"
-    chart = "cluster-autoscaler"
-    namespace = "kube-system"
-    version = var.cluster_autoscaler_helm_version
+  repository = "https://kubernetes.github.io/autoscaler"
+  chart      = "cluster-autoscaler"
+  namespace  = "kube-system"
+  version    = var.cluster_autoscaler_helm_verion
 
-    set {
-        name = "rbac,serviceAccount.name"
-        value = "cluster-autoescaler"
-    }
+  set {
+    name  = "rbac.serviceAccount.name"
+    value = "cluster-autoscaler"
+  }
 
-    set {
-        name = "rbac,serviceAccount.annotations.eks\\.amazonaws\\.com/role-arn"
-        value = aws_iam_role.cluster_autoscaler[0].arn
-    }
+  set {
+    name  = "rbac.serviceAccount.annotations.eks\\.amazonaws\\.com/role-arn"
+    value = aws_iam_role.cluster_autoscaler[0].arn
+  }
 
-    set {
-        name = "autoDiscovery.clusterName"
-        value = var.eks_name
-    }
+  set {
+    name  = "autoDiscovery.clusterName"
+    value = var.eks_name
+  }
 }
