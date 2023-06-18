@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: control-center
+  namespace: mx-payments
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: control-center
+  template:
+    metadata:
+      labels:
+        app: control-center
+    spec:
+      hostname: control-center
+      containers:
+        - name: control-center
+          image: confluentinc/cp-enterprise-control-center:6.0.1
+          ports:
+            - containerPort: 9021
+          env:
+            - name: CONTROL_CENTER_BOOTSTRAP_SERVERS
+              value: "kafka:9092"
+            - name: CONTROL_CENTER_REPLICATION_FACTOR
+              value: "1"
+            - name: PORT
+              value: "9021"

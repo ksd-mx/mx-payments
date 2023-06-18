@@ -1,0 +1,14 @@
+FROM golang:1.18
+
+WORKDIR /go/src
+
+RUN apt-get update && \
+  cd /tmp && git clone https://github.com/edenhill/librdkafka && \
+  cd librdkafka && git checkout tags/v2.0.2 && \
+  ./configure && make && make install && \
+  ldconfig &&\
+  cd ../ && rm -rf librdkafka
+
+COPY . .
+
+CMD ["tail", "-f", "/dev/null"]

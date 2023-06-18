@@ -1,0 +1,28 @@
+apiVersion: skaffold/v4beta5
+kind: Config
+deploy:
+  kubectl: { 
+    defaultNamespace: mx-payments 
+    }
+build:
+  local:
+    push: false
+  artifacts:
+    - image: github.com/ksd-mx/mx-payments
+      context: "tx-svc"
+      docker:
+        dockerfile: Dockerfile.dev
+      sync:
+        manual:
+          - src: "tx-svc/**/*.*"
+            dest: .
+manifests:
+  rawYaml:
+    - deploy/k8s/namespace.yml
+    - deploy/k8s/broker/kafka/service.yml
+    - deploy/k8s/broker/kafka/deployment.yml
+    - deploy/k8s/broker/zookeeper/service.yml
+    - deploy/k8s/broker/zookeeper/deployment.yml
+    - deploy/k8s/broker/topics-generator/deployment.yml
+    - deploy/k8s/tx-svc/secret.yml
+    - deploy/k8s/tx-svc/deployment.yml
